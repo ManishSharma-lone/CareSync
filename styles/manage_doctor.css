@@ -11,7 +11,7 @@
     --navy-dark: #061727;
     --sidebar-w: 260px;
     --glass-bg: rgba(255, 255, 255, 0.9);
-    --blue-gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--navy-dark 100%));
+    --blue-gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--navy-dark) 100%);
 
 }
 

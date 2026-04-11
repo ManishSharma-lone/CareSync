@@ -83,7 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body class="login-page">
-
     <div class="back-to-home">
         <a href="home.php" class="text-decoration-none text-muted">
             <i class="bi bi-arrow-left me-1"></i> Back to Home
@@ -95,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             <div class="login-header text-center">
                 <div class="logo-wrapper mb-3">
-                    <img src="/CARESYNC/Assets/CareSyncLogo.png" class="login-logo" alt="CareSync">
+                    <img src="./Assets/CareSyncLogo.png" class="login-logo" alt="CareSync">
                 </div>
                 <h2 class="fw-bold h4 mb-1">Welcome Back</h2>
                 <p class="text-muted small">Please enter your credentials to access CareSync</p>
