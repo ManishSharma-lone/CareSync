@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="/CARESYNC/Assets/CareSyncLogo.png" alt="Logo" class="logo-img">
-                CareSync
+                <span class="text-light">CareSync</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
                 <span class="navbar-toggler-icon"></span>

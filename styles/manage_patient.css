@@ -1,49 +1,121 @@
+/* --- PREMIUM FONT --- */
 @font-face {
     font-family: 'Custom';
     src: url('../Font/Outfit-Bold.ttf') format('truetype');
     font-weight: bold;
 }
 
-.manage_patient{
-     font-family: 'Custom';
-     font-size: 25px;
+/* --- THEME VARIABLES --- */
+:root {
+    --primary-blue: #0061ff;
+    --navy-dark: #061727;
+    --sidebar-w: 260px;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+     --blue-gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--navy-dark 100%));
+
 }
 
-.admin-bg
-{
-    background: linear-gradient(135deg,#e3f2fd,#ffffff);
+/* --- BACKGROUND --- */
+.admin-bg {
+    background: #f8fafc;
     min-height: 100vh;
 }
 
-
-/* Rounded buttons */
-.btn-rounded
-{
-    border-radius: 30px;
-    padding: 6px 18px;
-    font-weight: 500;
+/* --- TABLE TITLE --- */
+.manage_doctor {
+    font-family: 'Custom';
+    font-size: 24px;
+    color: var(--navy-dark);
 }
 
-
-/* Card styling */
-.card
-{
-    border-radius: 15px;
-}
-
-
-/* Table hover */
-.table-hover tbody tr:hover
-{
-    background-color: #f1f7ff;
+/* --- GLASS CARD CONTAINER --- */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.04);
     transition: 0.3s;
 }
 
-
-/* Badge styling */
-.badge
-{
-    padding: 6px 12px;
-    font-size: 13px;
+/* --- MODERN TABLE STYLING --- */
+.table {
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Adds spacing between rows */
 }
 
+.table thead th {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 15px;
+}
+
+.table tbody tr {
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    transition: 0.3s;
+}
+
+.table tbody tr td {
+    border: none;
+    padding: 15px;
+}
+
+.table tbody tr td:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.table tbody tr td:last-child {
+    border-radius: 0 12px 12px 0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f7ff;
+    transform: scale(1.005);
+}
+
+/* --- BUTTONS & INPUTS --- */
+.btn-rounded {
+    border-radius: 50px;
+    padding: 8px 22px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.form-control, .form-select {
+    border: 1px solid #e2e8f0;
+    padding: 10px 15px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 97, 255, 0.1);
+}
+
+/* --- SOFT BADGE STYLING --- */
+.badge {
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.bg-info-soft { background: rgba(13, 202, 240, 0.12); color: #0dcaf0; }
+.bg-primary-soft { background: rgba(0, 97, 255, 0.12); color: #0061ff; }
+.bg-danger-soft { background: rgba(220, 53, 69, 0.12); color: #dc3545; }
+
+/* --- ICON BOX --- */
+.icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+}

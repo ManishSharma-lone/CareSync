@@ -1,9 +1,16 @@
 <?php
 require "../dbconnect.php";
+session_start();
+
+if (!isset($_SESSION['email'])) {
+    header('location:../login.php');
+    exit();
+}
+
 /* SEARCH LOGIC */
-$search = "";
-if (isset($_GET['search'])) {
-    $search = $_GET['search'];
+$search = isset($_GET['search']) ? trim($_GET['search']) : "";
+if (!empty($search)) {
+    $search = $conn->real_escape_string($search);
     $sql = "SELECT * FROM patients 
             WHERE patient_code LIKE '%$search%' 
             OR full_name LIKE '%$search%' 
@@ -19,146 +26,156 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Management - CareSync</title>
+    <title>CareSync | Manage Patients</title>
     <link rel="stylesheet" href="../Bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="../styles/manage_patient.css">
+    <link rel="stylesheet" href="../styles/admin_dashboard.css?v=<?php echo time(); ?>">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="admin-bg">
-    <div class="container-fluid px-4 py-4">
-        <div class="card shadow-lg border-0">
-            <!-- HEADER -->
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2 manage_patient">
-                    <img src="../icons/crowd.png" width="40">
-                    <h4 class="mb-0 fw-bold">Patient Management</h4>
-                </div>
-                <a href="admin_dashboard.php" class="btn btn-light btn-rounded px-4">
-                    Go Back
-                </a>
+
+    <div class="sidebar shadow">
+        <div class="text-center mb-5">
+            <img src="../Assets/CareSyncLogo.png" width="45" alt="Logo">
+            <h4 class="mt-2 text-white">CareSync</h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="admin_dashboard.php"><i data-lucide="layout-grid"></i> <span>Dashboard</span></a>
+            <a class="nav-link" href="manage_doctor.php"><i data-lucide="user-cog"></i> <span>Doctors</span></a>
+            <a class="nav-link active" href="manage_patient.php"><i data-lucide="users"></i> <span>Patients</span></a>
+            <a class="nav-link" href="doctor_schedule.php"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+        </nav>
+        <a href="../logout.php" class="nav-link logout-link">
+            <i data-lucide="log-out"></i> <span>Logout</span>
+        </a>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">Patient Management</h2>
+                <p class="text-muted">Maintain and monitor patient registration records</p>
             </div>
-            <!-- BODY -->
+            <a href="add_patient.php" class="action-btn">
+                <i data-lucide="user-plus" class="me-1"></i> Register Patient
+            </a>
+        </div>
 
-            <div class="card-body">
-                <!-- SEARCH BAR -->
-                <form method="GET">
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <input type="text" name="search" class="form-control shadow-sm"
-                                placeholder="Search Patient by ID, Name or Phone" value="<?php echo $search; ?>">
-                        </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-primary btn-rounded px-4 fw-bold">
-                                Search
-                            </button>
-                        </div>
+        <div class="glass-card mb-4 p-4">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-9">
+                    <label class="form-label small fw-bold text-muted">SEARCH DIRECTORY</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-pill px-3">
+                            <i data-lucide="search" size="18" class="text-muted"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-start-0 rounded-end-pill px-3" 
+                               placeholder="Search by Patient ID, Name, or Mobile..." value="<?php echo htmlspecialchars($search); ?>">
                     </div>
-                </form>
-                <!-- TABLE -->
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle text-center">
-                        <thead class="table-dark">
-                            <tr>
-                               <th>Patient ID</th>
-                                <th>Name</th>
-                                <th>DOB</th>
-                                <th>Gender</th>
-                                <th>Mobile</th>
-                                <th>City</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    ?>
-                                    <tr>
-                                        <td>
-                                            <?php echo $row['patient_code']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['full_name']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['dob']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['gender']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['mobile']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['city']; ?>
-                                        </td>
-                                        <td>
-
-                                            <a class="btn btn-success btn-sm btn-rounded fw-bold me-2"
-                                                href="view_patient.php?id=<?php echo $row['patient_code']; ?>">
-                                                View
-                                            </a>
-
-                                            <a class="btn btn-success btn-sm btn-rounded fw-bold me-2"
-                                                href="edit_patient.php?id=<?php echo $row['patient_code']; ?>">
-                                                Edit
-                                            </a>
-
-                                            <a href="delete_patient.php?id=<?php echo $row['patient_code']?>"class="btn btn-danger btn-sm btn-rounded fw-bold" data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal"
-                                                onclick="setDeleteId('<?php echo $row['patient_code']; ?>')">
-                                                Delete
-                                            </a>
-
-                                        </td>
-                                    </tr>
-                                    <?php
-                                }
-                            } else {
-
-                                echo "<tr><td colspan='7'>No Patients Found</td></tr>";
-
-                            }
-
-                            ?>
-                        </tbody>
-                    </table>
                 </div>
-         </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2">
+                        Find Patient
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Patient Details</th>
+                            <th>DOB / Gender</th>
+                            <th>Contact</th>
+                            <th>Location</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($result->num_rows > 0): ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td class="ps-4"><span class="badge bg-primary-soft text-primary">#<?php echo $row['patient_code']; ?></span></td>
+                                    <td>
+                                        <div class="fw-bold"><?php echo $row['full_name']; ?></div>
+                                        <small class="text-muted text-uppercase" style="font-size: 10px; letter-spacing: 1px;">Registered User</small>
+                                    </td>
+                                    <td>
+                                        <div class="small fw-medium"><?php echo $row['dob']; ?></div>
+                                        <div class="small text-muted"><?php echo $row['gender']; ?></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i data-lucide="phone" size="14" class="text-muted"></i>
+                                            <span class="small"><?php echo $row['mobile']; ?></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i data-lucide="map-pin" size="14" class="text-muted"></i>
+                                            <span class="small"><?php echo $row['city']; ?></span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a href="view_patient.php?id=<?php echo $row['patient_code']; ?>" 
+                                               class="btn-icon text-primary" title="View Profile">
+                                                <i data-lucide="user-circle" size="20"></i>
+                                            </a>
+                                            <a href="edit_patient.php?id=<?php echo $row['patient_code']; ?>" 
+                                               class="btn-icon text-success mx-2" title="Edit">
+                                                <i data-lucide="edit" size="20"></i>
+                                            </a>
+                                            <button class="btn-icon text-danger border-0 bg-transparent" 
+                                                    onclick="setDeleteId('<?php echo $row['patient_code']; ?>')"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete">
+                                                <i data-lucide="trash-2" size="20"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i data-lucide="search-x" size="40" class="text-muted mb-2"></i>
+                                    <p class="text-muted">No patient records found.</p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
-    <!-- DELETE MODAL -->
 
     <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <h5>Are you sure you want to delete this patient?</h5>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a id="deleteBtn" class="btn btn-danger">Delete</a>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-body text-center p-5">
+                    <div class="icon-box bg-danger-soft text-danger mx-auto mb-4" style="width:70px; height:70px;">
+                        <i data-lucide="user-minus" size="40"></i>
+                    </div>
+                    <h4 class="fw-bold">Remove Patient?</h4>
+                    <p class="text-muted">Are you sure you want to delete this patient profile? This will remove all associated history.</p>
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <button class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a id="deleteBtn" class="btn btn-danger rounded-pill px-4">Delete Permanently</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
-        /* PASS PATIENT ID TO DELETE BUTTON */
-        function setDeleteId(patientId) {
-
-            document.getElementById("deleteBtn").href =
-                "delete_patient.php?id=" + patientId;
+        lucide.createIcons();
+        function setDeleteId(id) {
+            document.getElementById("deleteBtn").href = "delete_patient.php?id=" + id;
         }
-
     </script>
+    <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* --- FONTS & ROOT --- */
 :root {
     /* 1. Primary Colors */
-    --primary: #0061ff;
+    --primary-blue: #0061ff;
     /* Bold Blue */
     --primary-dark: #004dc6;
     --accent: #60efff;
@@ -10,7 +10,7 @@
     /* Deep Midnight Blue */
 
     /* 2. The New Gradient Mix (Deep Blue -> Bold Blue -> Light Blue) */
-    --blue-gradient: linear-gradient(135deg, var(--primary) 0%, var(--sidebar-bg) 100%);
+    --blue-gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--sidebar-bg) 100%);
 
     /* 3. UI Colors */
     --glass-bg: rgba(255, 255, 255, 0.75);

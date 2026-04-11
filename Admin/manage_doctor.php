@@ -1,6 +1,12 @@
 <?php
 require "../dbconnect.php";
 session_start();
+
+if (!isset($_SESSION['email'])) {
+    header('location:../login.php');
+    exit();
+}
+
 $search = isset($_GET['search']) ? trim($_GET['search']) : "";
 $department = isset($_GET['department']) ? trim($_GET['department']) : "";
 
@@ -8,8 +14,7 @@ $sql = "SELECT * FROM doctors WHERE 1";
 
 if (!empty($search)) {
     $search = $conn->real_escape_string($search);
-    $sql .= " AND (doctor_code LIKE '%$search%' 
-               OR full_name LIKE '%$search%')";
+    $sql .= " AND (doctor_code LIKE '%$search%' OR full_name LIKE '%$search%')";
 }
 
 if (!empty($department)) {
@@ -22,187 +27,160 @@ $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Doctor Management - CareSync</title>
-
-    <!-- Bootstrap -->
+    <title>CareSync | Manage Doctors</title>
     <link rel="stylesheet" href="../Bootstrap/bootstrap.min.css">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../styles/manage_doctor.css">
-
+    <link rel="stylesheet" href="../styles/admin_dashboard.css?v=<?php echo time(); ?>">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+<body>
 
-<body class="admin-bg">
-    <div class="container-fluid">
-        <!-- HEADER -->
-        <div class="card shadow-lg border-0 mt-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <div class="mb-0 manage_doctor">
-                    <img src="../icons/medical-staff.png" class="mx-auto mb-3" width="50">
-                    Doctor Management
-                </div>
-                <a href="admin_dashboard.php" class="btn btn-light btn-rounded">
-                    Go Back
-                </a>
+    <div class="sidebar shadow">
+        <div class="text-center mb-5">
+            <img src="../Assets/CareSyncLogo.png" width="45" alt="Logo">
+            <h4 class="mt-2">CareSync</h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="admin_dashboard.php"><i data-lucide="layout-grid"></i> <span>Dashboard</span></a>
+            <a class="nav-link active" href="manage_doctor.php"><i data-lucide="user-cog"></i> <span>Doctors</span></a>
+            <a class="nav-link" href="manage_patient.php"><i data-lucide="users"></i> <span>Patients</span></a>
+            <a class="nav-link" href="doctor_schedule.php"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+        </nav>
+        <a href="../logout.php" class="nav-link logout-link">
+            <i data-lucide="log-out"></i> <span>Logout</span>
+        </a>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">Doctor Management</h2>
+                <p class="text-muted">View, search, and manage healthcare professionals</p>
             </div>
+            <a href="add_doctor.php" class="action-btn">
+                <i data-lucide="plus-circle" class="me-1"></i> Add New Doctor
+            </a>
+        </div>
 
+        <div class="glass-card mb-4 p-4">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-muted">SEARCH</label>
+                    <input type="text" name="search" class="form-control rounded-pill px-3" 
+                           placeholder="Name or Doctor ID..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-muted">DEPARTMENT</label>
+                    <select name="department" class="form-select rounded-pill">
+                        <option value="">All Departments</option>
+                        <?php 
+                        $depts = ["Cardiology", "Neurology", "Orthopedics", "Gynecology", "Pediatrics", "General Medicine"];
+                        foreach($depts as $d) {
+                            $sel = ($department == $d) ? "selected" : "";
+                            echo "<option value='$d' $sel>$d</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">
+                        <i data-lucide="search" size="18" class="me-1"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <div class="card-body">
-
-                <!-- SEARCH AND FILTER -->
-                <form method="GET">
-                    <div class="row mb-3">
-
-                        <!-- Search by ID or Name -->
-                        <div class="col-md-4">
-                            <input type="text" name="search" class="form-control" placeholder="Search by ID or Name..."
-                                value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>">
-                        </div>
-
-                        <!-- Filter by Specialization -->
-                        <div class="col-md-3">
-                            <select name="department" class="form-control">
-                                <option value="">--SELECT--</option>
-
-                                <option value="Cardiology" <?php if ($department == "Cardiology")
-                                    echo "selected"; ?>>
-                                    Cardiology</option>
-
-                                <option value="Neurology" <?php if ($department == "Neurology")
-                                    echo "selected"; ?>>
-                                    Neurology</option>
-
-                                <option value="Orthopedics" <?php if ($department == "Orthopedics")
-                                    echo "selected"; ?>>Orthopedics</option>
-
-                                <option value="Gynecology" <?php if ($department == "Gynecology")
-                                    echo "selected"; ?>>
-                                    Gynecology</option>
-
-                                <option value="Pediatrics" <?php if ($department == "Pediatrics")
-                                    echo "selected"; ?>>
-                                    Pediatrics</option>
-
-                                <option value="General Medicine" <?php if ($department == "General Medicine")
-                                    echo "selected"; ?>>General Medicine</option>
-                            </select>
-                        </div>
-
-                        <!-- Search Button -->
-                        <div class="col-md-2">
-                            <button class="btn btn-primary btn-rounded px-4 fw-bold">
-                                Search
-                            </button>
-                        </div>
-
-                    </div>
-                </form>
-
-                <!-- TABLE -->
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle text-center">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Department</th>
-                                <th>Specialization</th>
-                                <th>Experience</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    ?>
-                                    <tr>
-                                        <td>
-                                            <?php echo $row['doctor_code']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['full_name']; ?>
-                                        </td>
-
-                                        <td>
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Doctor ID</th>
+                            <th>Doctor Info</th>
+                            <th>Department</th>
+                            <th>Experience</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($result->num_rows > 0): ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-primary">#<?php echo $row['doctor_code']; ?></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="icon-box bg-light text-primary" style="width:40px; height:40px;">
+                                                <i data-lucide="user" size="18"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold"><?php echo $row['full_name']; ?></div>
+                                                <small class="text-muted"><?php echo $row['specialization']; ?></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-info-soft text-info px-3">
                                             <?php echo $row['department']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['specialization']; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo $row['experience']; ?>
-                                        </td>
-
-                                        <td>
-
-                                            <a class="btn btn-success btn-sm btn-rounded fw-bold me-2"
-                                                href="view_doctor.php?id=<?php echo $row['doctor_code']; ?>">
-                                                View
+                                        </span>
+                                    </td>
+                                    <td><span class="fw-medium"><?php echo $row['experience']; ?> Years</span></td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a href="view_doctor.php?id=<?php echo $row['doctor_code']; ?>" 
+                                               class="btn btn-sm btn-light rounded-circle me-2" title="View">
+                                                <i data-lucide="eye" size="18" class="text-primary"></i>
                                             </a>
-
-                                            <a class="btn btn-success btn-sm btn-rounded fw-bold me-2"
-                                                href="edit_doctor.php?id=<?php echo $row['doctor_code']; ?>">
-                                                Edit
+                                            <a href="edit_doctor.php?id=<?php echo $row['doctor_code']; ?>" 
+                                               class="btn btn-sm btn-light rounded-circle me-2" title="Edit">
+                                                <i data-lucide="edit-3" size="18" class="text-success"></i>
                                             </a>
-
-                                            <a href="delete_doctor.php?id=<?php echo $row['doctor_code'] ?>"
-                                                class="btn btn-danger btn-sm btn-rounded fw-bold" data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal"
-                                                onclick="setDeleteId('<?php echo $row['doctor_code']; ?>')">
-                                                Delete
-                                            </a>
-
-                                        </td>
-                                    </tr>
-                                    <?php
-                                }
-                            } else {
-
-                                echo "<tr><td colspan='7'>No Doctors Found</td></tr>";
-
-                            }
-                            ?>
-                        </tbody>
-
-                    </table>
-                </div>
+                                            <button class="btn btn-sm btn-light rounded-circle" 
+                                                    onclick="setDeleteId('<?php echo $row['doctor_code']; ?>')"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                <i data-lucide="trash-2" size="18" class="text-danger"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">No doctors found matching your criteria.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
+
     <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <h5>Are you sure you want to delete this doctor?</h5>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a id="deleteBtn" class="btn btn-danger">Delete</a>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-body text-center p-5">
+                    <div class="icon-box bg-danger-soft text-danger mx-auto mb-4" style="width:70px; height:70px;">
+                        <i data-lucide="alert-triangle" size="40"></i>
+                    </div>
+                    <h4 class="fw-bold">Confirm Deletion</h4>
+                    <p class="text-muted">Are you sure you want to remove this doctor? This action cannot be undone.</p>
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <button class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a id="deleteBtn" class="btn btn-danger rounded-pill px-4">Delete Doctor</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <script>
-        /* PASS PATIENT ID TO DELETE BUTTON */
-        function setDeleteId(doctorId) {
-            document.getElementById("deleteBtn").href =
-                "delete_doctor.php?id=" + doctorId;
-        }
 
+    <script>
+        lucide.createIcons();
+        function setDeleteId(id) {
+            document.getElementById("deleteBtn").href = "delete_doctor.php?id=" + id;
+        }
     </script>
+    <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
 </body>
 </html>
