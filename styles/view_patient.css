@@ -1,0 +1,89 @@
+body{
+background:linear-gradient(135deg,#0f4c81,#1976d2);
+font-family:Segoe UI;
+min-height:100vh;
+}
+
+.header-section{
+display:flex;
+align-items:center;
+gap:15px;
+color:white;
+margin-bottom:30px;
+}
+
+.header-section h2{
+margin:0;
+font-weight:600;
+}
+
+.header-section p{
+margin:0;
+opacity:.8;
+}
+
+.patient-card{
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.patient-top{
+display:flex;
+align-items:center;
+gap:20px;
+border-bottom:1px solid #eee;
+padding-bottom:15px;
+}
+
+.avatar img{
+width:80px;
+height:80px;
+border-radius:50%;
+background:#f1f1f1;
+padding:10px;
+}
+
+.patient-name h3{
+margin:0;
+font-weight:600;
+}
+
+.patient-name p{
+margin:0;
+color:#777;
+}
+
+.info{
+margin-bottom:15px;
+}
+
+.info span{
+font-weight:600;
+color:#555;
+display:block;
+margin-bottom:3px;
+}
+
+.info p{
+background:#f5f9ff;
+padding:10px;
+border-radius:6px;
+margin:0;
+}
+
+.btn-area{
+margin-top:25px;
+display:flex;
+gap:10px;
+}
+
+.btn-primary{
+background:#1976d2;
+border:none;
+}
+
+.btn-primary:hover{
+background:#0f4c81;
+}

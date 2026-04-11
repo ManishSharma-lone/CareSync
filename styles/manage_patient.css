@@ -1,0 +1,49 @@
+@font-face {
+    font-family: 'Custom';
+    src: url('../Font/Outfit-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+.manage_patient{
+     font-family: 'Custom';
+     font-size: 25px;
+}
+
+.admin-bg
+{
+    background: linear-gradient(135deg,#e3f2fd,#ffffff);
+    min-height: 100vh;
+}
+
+
+/* Rounded buttons */
+.btn-rounded
+{
+    border-radius: 30px;
+    padding: 6px 18px;
+    font-weight: 500;
+}
+
+
+/* Card styling */
+.card
+{
+    border-radius: 15px;
+}
+
+
+/* Table hover */
+.table-hover tbody tr:hover
+{
+    background-color: #f1f7ff;
+    transition: 0.3s;
+}
+
+
+/* Badge styling */
+.badge
+{
+    padding: 6px 12px;
+    font-size: 13px;
+}
+

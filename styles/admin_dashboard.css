@@ -1,0 +1,109 @@
+@font-face {
+    font-family: 'Custom';
+    src: url('../Font/Outfit-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+.dash h4 {
+    font-family: 'Custom';
+}
+
+
+.dashboard-bg{
+    background:#f1f5f9;
+}
+
+.dashboard-header{
+    background:#2563EB;
+}
+
+.dashboard-nav{
+    background:white;
+    border-bottom:1px solid #ddd;
+}
+
+.nav-btn{
+    border:none;
+    background:none;
+    margin-right:15px;
+    font-weight:500;
+    text-decoration: none;
+}
+
+.nav-btn:hover{
+    color:#2563EB;
+}
+
+.nav-btn.active{
+    color:#2563EB;
+    border-bottom:2px solid #2563EB;
+}
+
+.stat-card{
+    border-radius:12px;
+    transition:0.3s;
+}
+
+.stat-card:hover{
+    transform:translateY(-5px);
+}
+
+.stat-icon{
+    font-size:30px;
+    margin-bottom:10px;
+}
+
+.action-btn{
+    background:#2563EB;
+    color:white;
+    margin:8px;
+    padding:10px 20px;
+    border-radius:25px;
+}
+
+.action-btn:hover{
+    background:#1d4ed8;
+    color:white;
+}
+
+
+.nav-btn
+{
+    background: none;
+    border: none;
+    outline: none;
+
+    color: #374151;    
+    font-size: 16px;
+    font-weight: 500;
+
+    margin-right: 20px;
+    padding: 5px 0;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition: color 0.3s;
+}
+
+/* Hover effect */
+.nav-btn:hover
+{
+    color: #2563EB;
+}
+
+/* Active page */
+.nav-btn.active
+{
+    color: #2563EB;
+    font-weight: 600;
+}
+.logout-btn{
+    border-radius: 50px;     /* more rounded */
+    font-weight: 600;        /* bold text */
+    padding: 8px 25px;       /* better size */
+    font-size: 16px;         /* slightly bigger */
+}
+
+

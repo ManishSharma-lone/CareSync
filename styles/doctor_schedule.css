@@ -1,0 +1,62 @@
+@font-face {
+    font-family: 'Custom';
+    src: url('../Font/Outfit-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+.add h3 {
+    font-family: 'Custom';
+}
+
+.admin-bg {
+    background: #f4f7fc;
+    min-height: 100vh;
+}
+
+/* Card */
+.card {
+    border-radius: 15px;
+}
+
+.schedule-header {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+/* Icon circle */
+.icon-circle {
+    width: 55px;
+    height: 55px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+/* Rounded buttons */
+.btn-rounded {
+    border-radius: 25px;
+    font-weight: 500;
+}
+
+/* Table */
+.table {
+    background: white;
+}
+
+.table th {
+    font-size: 15px;
+}
+
+.table td {
+    font-size: 14px;
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+    border-radius: 20px;
+}

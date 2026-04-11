@@ -1,0 +1,144 @@
+/* ================= LOGIN THEME ================= */
+:root {
+    --primary: #2563EB;
+    --primary-dark: #1E4ED8;
+    --secondary: #0F172A;
+    --slate-50: #F8FAFC;
+    --slate-200: #E2E8F0;
+    --slate-600: #475569;
+    --white: #FFFFFF;
+}
+
+.login-page {
+    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-to-home {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+}
+
+/* Card Design */
+.login-card {
+    background: var(--white);
+    width: 100%;
+    max-width: 450px;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.login-header {
+    padding: 40px 40px 10px;
+}
+
+.logo-wrapper {
+    background: var(--slate-50);
+    width: 70px;
+    height: 70px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.login-logo {
+    width: 45px;
+    height: 45px;
+}
+
+/* Custom Input Styling */
+.input-group-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icon-input {
+    position: absolute;
+    left: 15px;
+    color: var(--slate-600);
+    font-size: 1.1rem;
+}
+
+.form-control-custom {
+    width: 100%;
+    padding: 14px 15px 14px 45px;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.form-control-custom:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* Buttons & Links */
+.login-submit-btn {
+    background: var(--primary);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+}
+
+.login-submit-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+}
+
+.forgot-link {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.forgot-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.bg-light-soft {
+    background-color: #fcfdfe;
+}
+
+/* Modal Polish */
+.forgot-modal {
+    border-radius: 24px;
+    border: none;
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-card {
+        margin: 15px;
+        border-radius: 16px;
+    }
+
+    .login-header {
+        padding: 30px 20px 0;
+    }
+}

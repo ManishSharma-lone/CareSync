@@ -1,0 +1,127 @@
+:root {
+    --primary: #2563EB;
+    --primary-dark: #1E4ED8;
+    --secondary: #0F172A;
+    --bg-light: #F8FAFC;
+    --slate-200: #E2E8F0;
+    --text-muted: #64748B;
+}
+
+@font-face {
+    font-family: 'Custom';
+    src: url('../Font/Outfit-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.main-container {
+    min-height: 100vh;
+    padding: 40px 0;
+}
+
+/* Card - Match Patient Page */
+.doctor-card {
+    border-radius: 24px;
+    overflow: hidden;
+    background: #ffffff;
+    border: none;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* Header - Match Patient Page */
+.doctor-header {
+    background: var(--secondary);
+    padding: 40px;
+    color: white;
+}
+
+.header-icon-box {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add h3 {
+    font-family: 'Custom', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+/* Custom Inputs - Match Patient Page */
+.form-control-custom,
+.custom-select-style {
+    width: 100%;
+    padding: 12px 15px;
+    background: #fdfdfd;
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.form-control-custom:focus,
+.custom-select-style:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    background: #ffffff;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Button - Professional Gradient */
+.add-btn {
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    color: white !important;
+    border: none;
+    padding: 14px 50px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 10px 15px rgba(37, 99, 235, 0.2);
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px rgba(37, 99, 235, 0.3);
+}
+
+/* Modal - Success Theme */
+.modal-content.success-modal {
+    border-radius: 24px;
+    border: none;
+}
+
+.success-icon-box {
+    width: 80px;
+    height: 80px;
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 20px;
+}
+
+.footer-text {
+    background: #f8fafc;
+    text-align: center;
+    padding: 15px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

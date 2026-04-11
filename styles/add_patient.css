@@ -1,0 +1,107 @@
+:root {
+    --primary: #2563EB;
+    --primary-dark: #1E4ED8;
+    --secondary: #0F172A;
+    --bg-light: #F8FAFC;
+    --slate-200: #E2E8F0;
+    --text-muted: #64748B;
+}
+
+body.patient-page-bg {
+    background-color: var(--bg-light);
+    font-family: 'Inter', sans-serif;
+}
+
+.registration-card {
+    border-radius: 24px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+/* Header */
+.registration-header {
+    background: var(--secondary);
+    padding: 40px;
+}
+
+.header-icon-box {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Custom Inputs */
+.input-group-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icon-input {
+    position: absolute;
+    left: 15px;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.form-control-custom,
+.custom-select-style {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    background: #fdfdfd;
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.form-control-custom:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    background: #ffffff;
+}
+
+/* Radio Buttons */
+.gender-selection-box {
+    padding: 10px 0;
+}
+
+.custom-radio .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Register Button */
+.register-btn {
+    background: var(--primary);
+    color: white !important;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 10px 15px rgba(37, 99, 235, 0.2);
+}
+
+.register-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px rgba(37, 99, 235, 0.3);
+}
+
+/* Success Modal Icon */
+.success-icon-box {
+    width: 80px;
+    height: 80px;
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 20px;
+}

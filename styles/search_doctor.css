@@ -1,0 +1,105 @@
+@font-face {
+    font-family: 'Custom';
+    src: url('../Font/Outfit-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+.add h3 {
+    font-family: 'Custom';
+}
+
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    min-height: 100vh;
+}
+
+/* ===== TOP HEADER ===== */
+.top-header {
+    background:#2563EB;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.top-header h4 {
+    letter-spacing: 1px;
+    font-family: 'Custom';
+
+}
+
+/* ===== CONTAINER SPACING ===== */
+.container {
+    margin-top: 30px;
+}
+
+/* ===== SEARCH CARD ===== */
+.search-card {
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+/* ===== INPUT STYLING ===== */
+.form-control,
+.form-select {
+    border-radius: 12px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+}
+
+/* ===== DOCTOR CARD ===== */
+.doctor-card {
+    border-radius: 20px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.doctor-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+}
+
+/* ===== DOCTOR IMAGE ===== */
+.doctor-img {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #2563eb;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* ===== BUTTON IMPROVEMENT ===== */
+.btn-outline-primary {
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-success {
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* ===== BADGE STYLE ===== */
+.badge {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 20px;
+}
+
+/* ===== RESPONSIVE IMPROVEMENT ===== */
+@media (max-width: 768px) {
+    .doctor-card {
+        margin-bottom: 20px;
+    }
+}
