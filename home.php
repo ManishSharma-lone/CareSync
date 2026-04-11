@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     <nav class="navbar navbar-expand-lg navbar-light custom-navbar sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="/CARESYNC/Assets/CareSyncLogo.png" alt="Logo" class="logo-img">
+                <img src="./Assets/CareSyncLogo.png" alt="Logo" class="logo-img">
                 <span class="text-light">CareSync</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     </div>
                 </div>
                 <div class="col-lg-6 mt-5 mt-lg-0 text-center">
-                    <img src="/CARESYNC/Assets/Hero.jpg" alt="Healthcare" class="img-fluid hero-img">
+                    <img src="./Assets/Hero.jpg" alt="Healthcare" class="img-fluid hero-img">
                 </div>
             </div>
         </div>

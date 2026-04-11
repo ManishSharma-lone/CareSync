@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body class="login-page">
 
     <div class="back-to-home">
-        <a href="index.php" class="text-decoration-none text-muted">
+        <a href="home.php" class="text-decoration-none text-muted">
             <i class="bi bi-arrow-left me-1"></i> Back to Home
         </a>
     </div>
