@@ -1,100 +1,52 @@
 function validateForm() {
-    // 1. Setup - Clear previous error messages
-    document.querySelectorAll(".text-danger").forEach(function (el) {
-        el.textContent = "";
-    });
+    // 1. Clear previous errors
+    document.querySelectorAll(".text-danger").forEach(el => el.textContent = "");
 
     let isValid = true;
 
+    // Helper function to safely set error text
+    function setError(id, message) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = message;
+            isValid = false;
+        }
+    }
+
     // 2. Capture Values
-    let name = document.getElementById("name").value.trim();
-    let email = document.getElementById("email").value.trim();
-    let mobile = document.getElementById("mobile").value.trim();
-    let dob = document.getElementById("dob").value;
-    let aadhar = document.getElementById("aadhar").value.trim();
-    let blood = document.getElementById("blood").value;
-    let city = document.getElementById("city").value.trim();
-    let address = document.getElementById("address").value.trim();
-    let password = document.getElementById("password").value;
-    let confirmPassword = document.getElementById("confirmPassword").value;
-    let gender = document.querySelector('input[name="gender"]:checked');
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const dob = document.getElementById("dob").value;
+    const aadhar = document.getElementById("aadhar").value.trim();
+    const blood = document.getElementById("blood").value;
+    const city = document.getElementById("city").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const gender = document.querySelector('input[name="gender"]:checked');
 
     // 3. Regex Patterns
-    let nameRegex = /^[A-Za-z ]{3,}$/; // Min 3 letters
-    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    let mobileRegex = /^[6-9][0-9]{9}$/; // Indian mobile standard
-    let aadharRegex = /^[0-9]{12}$/;
-    let cityRegex = /^[A-Za-z ]{2,}$/; // Letters and spaces, min 2
+    const nameRegex = /^[A-Za-z ]{3,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const mobileRegex = /^[6-9][0-9]{9}$/;
+    const aadharRegex = /^[0-9]{12}$/;
+    const cityRegex = /^[A-Za-z ]{2,}$/;
 
     // 4. Validation Logic
+    if (!nameRegex.test(name)) setError("nameError", "Enter valid name (Min 3 letters)");
+    if (!emailRegex.test(email)) setError("emailError", "Enter a valid email address");
+    if (!mobileRegex.test(mobile)) setError("mobileError", "Enter valid 10-digit mobile number");
+    if (!dob) setError("dobError", "Please select date of birth");
+    if (!gender) setError("genderError", "Please select gender");
+    if (!aadharRegex.test(aadhar)) setError("aadharError", "Enter valid 12-digit Aadhar");
+    if (blood === "") setError("bloodError", "Please select blood group");
+    if (!cityRegex.test(city)) setError("cityError", "Enter valid city name");
+    if (address.length < 10) setError("addressError", "Min 10 characters required for address");
+    if (password.length < 6) setError("passwordError", "Min 6 characters required");
+    if (password !== confirmPassword) setError("confirmPasswordError", "Passwords do not match");
 
-    // Name
-    if (!nameRegex.test(name)) {
-        document.getElementById("nameError").textContent = "Enter valid name (Letters only, min 3)";
-        isValid = false;
-    }
-
-    // Email
-    if (!emailRegex.test(email)) {
-        document.getElementById("emailError").textContent = "Enter a valid email address";
-        isValid = false;
-    }
-
-    // Mobile
-    if (!mobileRegex.test(mobile)) {
-        document.getElementById("mobileError").textContent = "Enter valid 10-digit mobile number";
-        isValid = false;
-    }
-
-    // DOB
-    if (dob === "") {
-        document.getElementById("dobError").textContent = "Please select date of birth";
-        isValid = false;
-    }
-
-    // Gender
-    if (!gender) {
-        document.getElementById("genderError").textContent = "Please select gender";
-        isValid = false;
-    }
-
-    // Aadhar
-    if (!aadharRegex.test(aadhar)) {
-        document.getElementById("aadharError").textContent = "Enter valid 12-digit Aadhar number";
-        isValid = false;
-    }
-
-    // Blood Group
-    if (blood === "") {
-        document.getElementById("bloodError").textContent = "Please select blood group";
-        isValid = false;
-    }
-
-    // City Validation
-    if (!cityRegex.test(city)) {
-        document.getElementById("cityError").textContent = "Enter valid city name (Letters only)";
-        isValid = false;
-    }
-
-    // Address Validation
-    if (address.length < 10) {
-        document.getElementById("addressError").textContent = "Please enter a full address (min 10 characters)";
-        isValid = false;
-    }
-
-    // Password
-    if (password.length < 6) {
-        document.getElementById("passwordError").textContent = "Password must be at least 6 characters";
-        isValid = false;
-    }
-
-    // Confirm Password
-    if (password !== confirmPassword) {
-        document.getElementById("confirmPasswordError").textContent = "Passwords do not match";
-        isValid = false;
-    }
-
-    // 5. User Experience: Scroll to the first error found
+    // 5. UX: Scroll to first error
     if (!isValid) {
         const firstError = document.querySelector(".text-danger:not(:empty)");
         if (firstError) {

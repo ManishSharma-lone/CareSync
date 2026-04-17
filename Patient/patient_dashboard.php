@@ -56,7 +56,7 @@ $row = ($result->num_rows > 0) ? $result->fetch_assoc() : die("Patient not found
             <div class="glass-card p-2 px-3 d-flex align-items-center gap-3 shadow-sm">
                 <i data-lucide="bell" size="20" class="text-primary"></i>
                 <div class="vr"></div>
-                <img src="../icons/user.png" width="35" class="rounded-circle shadow-sm">
+                <img src="../icons/crowd.png" width="35" class="rounded-circle shadow-sm">
             </div>
         </div>
 

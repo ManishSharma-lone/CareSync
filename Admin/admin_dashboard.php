@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 session_start();
 require_once '../dbconnect.php';
 
@@ -21,7 +21,7 @@ $patCount = $patResult->fetch_assoc()['total'];
 // 3. Activity Logs
 $activityQuery = "SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 5";
 $activityResult = $conn->query($activityQuery);
-?>
+?> -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -100,6 +100,7 @@ $activityResult = $conn->query($activityQuery);
                     <div class="d-grid gap-3">
                         <a href="./add_doctor.php" class="action-btn text-center">Add New Doctor</a>
                         <a href="./add_patient.php" class="btn btn-outline-primary rounded-pill py-2 fw-bold">Add New Patient</a>
+                        <a href="./add_attendee.php" class="action-btn text-center">Add New Attendee</a>
                         <a href="#" class="btn btn-outline-dark rounded-pill py-2 fw-bold">Upload System Report</a>
                     </div>
                 </div>

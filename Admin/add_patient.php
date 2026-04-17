@@ -1,3 +1,83 @@
+<?php
+// 1. PHP Logic at the very top
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    require_once "../dbconnect.php"; // Adjust path if needed
+
+    $success = false;
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $mobile = $_POST['mobile'];
+    $dob = $_POST['dob'];
+    $gender = $_POST['gender'];
+    $aadhar = $_POST['aadhar'];
+    $blood = $_POST['blood'];
+    $city = $_POST['city'];
+    $address = $_POST['address'];
+    $password = $_POST['password'];
+    $confirmPassword = $_POST['confirmpassword'];
+
+    // Validation Check (Backend)
+    if ($password != $confirmPassword) {
+        echo "<script>alert('Passwords do not match');</script>";
+    } else {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+        // Check if email or Aadhar already exists
+        $check = $conn->prepare("SELECT id FROM patients WHERE email=? OR aadhar=?");
+        $check->bind_param("ss", $email, $aadhar);
+        $check->execute();
+        if ($check->get_result()->num_rows > 0) {
+            echo "<script>alert('Email or Aadhar already registered');</script>";
+        } else {
+            // Start transaction
+            $conn->begin_transaction();
+
+            try {
+                // Insert into patients table
+                $qry = "INSERT INTO patients(full_name, email, mobile, dob, gender, aadhar, blood_group, city, address, password) 
+                        VALUES(?,?,?,?,?,?,?,?,?,?)";
+                $stmt = $conn->prepare($qry);
+                $stmt->bind_param("ssssssssss", $name, $email, $mobile, $dob, $gender, $aadhar, $blood, $city, $address, $passwordHash);
+                $stmt->execute();
+                $last_id = $conn->insert_id;
+
+                // Generate Patient Code (e.g., PAT-2026-001)
+                $year = date("Y");
+                $patient_code = "PAT-" . $year . "-" . str_pad($last_id, 3, "0", STR_PAD_LEFT);
+
+                $update = $conn->prepare("UPDATE patients SET patient_code=? WHERE id=?");
+                $update->bind_param("si", $patient_code, $last_id);
+                $update->execute();
+
+                // Insert into users table for login access
+                $role = "patient";
+                $userQry = "INSERT INTO users(name, email, password, role, patient_code) VALUES(?,?,?,?,?)";
+                $userStmt = $conn->prepare($userQry);
+                $userStmt->bind_param("sssss", $name, $email, $passwordHash, $role, $patient_code);
+                $userStmt->execute();
+
+                // Log Activity
+                $activity = "New Patient Registered: " . $patient_code;
+                $logUser = "System"; 
+                $logQuery = "INSERT INTO activity_logs (activity, user) VALUES (?, ?)";
+                $stmtLog = $conn->prepare($logQuery);
+                $stmtLog->bind_param("ss", $activity, $logUser);
+                $stmtLog->execute();
+
+                $conn->commit();
+                $success = true; // This triggers the Modal below
+                include "../php_mail.php";
+                sendPatientMail($email,$name,$patient_code);
+
+            } catch (Exception $e) {
+                $conn->rollback();
+                echo "<script>alert('Error: " . addslashes($e->getMessage()) . "');</script>";
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,9 +98,9 @@
         </div>
 
         <div class="card registration-card border-0 shadow-lg">
-            <div class="registration-header text-white">
+            <div class="registration-header text-white" style="background: linear-gradient(135deg, #2563EB, #061727); padding: 30px; border-radius: 15px 15px 0 0;">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="header-icon-box">
+                    <div class="header-icon-box bg-white p-2 rounded-3">
                         <img src="../icons/crowd.png" width="40" alt="icon">
                     </div>
                     <div>
@@ -31,125 +111,113 @@
             </div>
 
             <div class="card-body p-4 p-md-5">
-                <form id="patientForm" onsubmit="return validateForm()" method="post" novalidate>
+                <form id="patientForm" action ="add_patient.php" onsubmit="return validateForm()" method="post" novalidate>
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Full Name</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-person icon-input"></i>
-                                <input type="text" id="name" class="form-control-custom" placeholder="John Doe" name="name" required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                                <input type="text" id="name" class="form-control bg-light border-start-0" placeholder="John Doe" name="name">
                             </div>
                             <span id="nameError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Email Address</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-envelope icon-input"></i>
-                                <input type="email" id="email" class="form-control-custom" placeholder="john@example.com" name="email" required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope"></i></span>
+                                <input type="email" id="email" class="form-control bg-light border-start-0" placeholder="john@example.com" name="email">
                             </div>
                             <span id="emailError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Mobile Number</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-phone icon-input"></i>
-                                <input type="tel" id="mobile" class="form-control-custom" placeholder="+91 XXXXX XXXXX" name="mobile" required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-phone"></i></span>
+                                <input type="tel" id="mobile" class="form-control bg-light border-start-0" placeholder="9876543210" name="mobile">
                             </div>
                             <span id="mobileError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Date of Birth</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-calendar-event icon-input"></i>
-                                <input type="date" id="dob" class="form-control-custom" name="dob" required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-event"></i></span>
+                                <input type="date" id="dob" class="form-control bg-light border-start-0" name="dob">
                             </div>
                             <span id="dobError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase d-block">Gender</label>
-                            <div class="gender-selection-box d-flex gap-3">
-                                <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="gender" id="male" value="male" required>
+                            <div class="d-flex gap-3 py-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender" id="male" value="male">
                                     <label class="form-check-label" for="male">Male</label>
                                 </div>
-                                <div class="form-check custom-radio">
+                                <div class="form-check">
                                     <input class="form-check-input" type="radio" name="gender" id="female" value="female">
                                     <label class="form-check-label" for="female">Female</label>
                                 </div>
-                                <div class="form-check custom-radio">
+                                <div class="form-check">
                                     <input class="form-check-input" type="radio" name="gender" id="other" value="Other">
                                     <label class="form-check-label" for="other">Other</label>
                                 </div>
                             </div>
+                            <span id="genderError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Aadhar ID</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-card-heading icon-input"></i>
-                                <input type="text" id="aadhar" class="form-control-custom" placeholder="12-digit Aadhar Number" name="aadhar" required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-card-heading"></i></span>
+                                <input type="text" id="aadhar" class="form-control bg-light border-start-0" placeholder="12-digit number" name="aadhar">
                             </div>
                             <span id="aadharError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Blood Group</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-droplet icon-input"></i>
-                                <select id="blood" class="form-select custom-select-style" name="blood" required>
-                                    <option value="">Select Group</option>
-                                    <option>A+</option><option>B+</option><option>AB+</option><option>O+</option>
-                                    <option>A-</option><option>B-</option><option>AB-</option><option>O-</option>
-                                </select>
-                            </div>
+                            <select id="blood" class="form-select bg-light" name="blood">
+                                <option value="">Select Group</option>
+                                <option>A+</option><option>B+</option><option>AB+</option><option>O+</option>
+                                <option>A-</option><option>B-</option><option>AB-</option><option>O-</option>
+                            </select>
+                            <span id="bloodError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">City</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-geo-alt icon-input"></i>
-                                <input type="text" id="city" class="form-control-custom" placeholder="Bhubaneswar" name="city" required>
-                            </div>
+                            <input type="text" id="city" class="form-control bg-light" placeholder="Bhubaneswar" name="city">
+                            <span id="cityError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-12">
                             <label class="form-label fw-bold small text-uppercase">Permanent Address</label>
-                            <textarea id="address" class="form-control-custom ps-3" rows="2" name="address" placeholder="Full residential address..." required></textarea>
+                            <textarea id="address" class="form-control bg-light" rows="2" name="address" placeholder="Full address..."></textarea>
+                            <span id="addressError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Create Password</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-shield-lock icon-input"></i>
-                                <input type="password" id="password" class="form-control-custom" name="password" required>
-                            </div>
+                            <input type="password" id="password" class="form-control bg-light" name="password">
+                            <span id="passwordError" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase">Confirm Password</label>
-                            <div class="input-group-custom">
-                                <i class="bi bi-shield-check icon-input"></i>
-                                <input type="password" id="confirmPassword" class="form-control-custom" name="confirmpassword" required>
-                            </div>
+                            <input type="password" id="confirmPassword" class="form-control bg-light" name="confirmpassword">
+                            <span id="confirmPasswordError" class="text-danger small"></span>
                         </div>
                     </div>
 
                     <div class="text-center mt-5">
-                        <button type="submit" class="btn register-btn w-100 py-3">
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm" style="border-radius: 12px;">
                             Complete Registration <i class="bi bi-check-circle ms-2"></i>
                         </button>
                     </div>
                 </form>
-            </div>
-
-            <div class="card-footer bg-light p-4 text-center">
-                <p class="mb-0 text-muted small">
-                    <i class="bi bi-lock-fill me-1"></i> Data is encrypted and stored securely according to healthcare standards.
-                </p>
             </div>
         </div>
     </div>
@@ -158,12 +226,9 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 p-4 text-center rounded-4 shadow">
                 <div class="modal-body">
-                    <div class="success-icon-box">
-                        <i class="bi bi-check-lg"></i>
-                    </div>
+                    <div class="mb-3 text-success" style="font-size: 3rem;"><i class="bi bi-check-circle-fill"></i></div>
                     <h3 class="fw-bold mb-2">Registration Successful!</h3>
-                    <p class="text-muted mb-4">Patient profile has been created. Redirecting to home...</p>
-                    <button class="btn btn-primary px-5 rounded-pill" data-bs-dismiss="modal">OK</button>
+                    <p class="text-muted mb-4">Redirecting to login...</p>
                 </div>
             </div>
         </div>
@@ -171,16 +236,12 @@
 
     <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
     <script src="../js/add_patient.js"></script>
-
-    <?php
-    // (Your existing PHP logic here - ensure it handles the $success variable)
-    if (isset($success) && $success) {
-        echo "<script>
-            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
-            setTimeout(function() { window.location.href = '../index.php'; }, 2500);
-        </script>";
-    }
-    ?>
+    <?php if ($success): ?>
+        <script>
+            var myModal = new bootstrap.Modal(document.getElementById('successModal'));
+            myModal.show();
+            setTimeout(function(){ window.location.href='../login.php'; }, 3000);
+        </script>
+    <?php endif; ?>
 </body>
 </html>
