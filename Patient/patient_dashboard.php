@@ -66,7 +66,7 @@ $row = ($result->num_rows > 0) ? $result->fetch_assoc() : die("Patient not found
                     <span class="badge bg-light text-primary mb-3 px-3 py-2 rounded-pill fw-bold">Health Status: Great</span>
                     <h1 class="fw-bold display-5">Stay Healthy, Stay Fit!</h1>
                     <p class="opacity-75 fs-5">You have a follow-up appointment in 2 days. Check your vitals below.</p>
-                    <button class="btn btn-light rounded-pill px-5 py-2 fw-bold text-primary mt-3">My Appointments</button>
+                    <a href="../appointment_scheduling/appointments.php" class="btn btn-light rounded-pill px-5 py-2 fw-bold text-primary mt-3">My Appointments</a>
                 </div>
             </div>
             <i data-lucide="heart-pulse" size="180" class="banner-icon"></i>

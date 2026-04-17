@@ -37,7 +37,7 @@ $stmt->execute();
     <style>
         body {
             height: 100vh;
-            background: linear-gradient(135deg, #2563EB, #1E3A8A);
+            background: linear-gradient(135deg, #2563EB, #0F172A);
             display: flex;
             align-items: center;
             justify-content: center;

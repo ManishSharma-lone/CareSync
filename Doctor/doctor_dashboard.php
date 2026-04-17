@@ -34,7 +34,8 @@ $row = ($result->num_rows > 0) ? $result->fetch_assoc() : die("Doctor not found"
     </div>
     <nav class="nav flex-column">
         <a class="nav-link active" href="#"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
-        <a class="nav-link" href="#"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+        <a class="nav-link" href="../appointment_scheduling/appointments.php"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+        <a class="nav-link" href="manage_schedule.php"><i data-lucide="clock"></i> <span>My Schedule</span></a>
         <a class="nav-link" href="#"><i data-lucide="users"></i> <span>Patients</span></a>
         <a class="nav-link" href="#"><i data-lucide="clipboard-list"></i> <span>Notes</span></a>
         <div style="margin-top: auto; padding-top: 100px;">

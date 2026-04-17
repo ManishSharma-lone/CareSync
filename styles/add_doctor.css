@@ -5,7 +5,8 @@
     --bg-light: #F8FAFC;
     --slate-200: #E2E8F0;
     --text-muted: #64748B;
-    --blue-gardient:linear-gradient(135deg, var(--primary) 0%, var(--navy-dark) 100%)
+    --navy-dark: #061727;
+    --blue-gradient: linear-gradient(135deg, var(--primary) 0%, var(--navy-dark) 100%);
 }
 
 @font-face {
@@ -85,7 +86,7 @@ body {
 
 /* Button - Professional Gradient */
 .add-btn {
-    background: var(--blue-gardient);
+    background: var(--blue-gradient) !important;
     color: white !important;
     border: none;
     padding: 14px 50px;

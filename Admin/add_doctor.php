@@ -6,9 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../Bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="../styles/add_doctor.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 
-<body class="patient-page-bg"> <div class="container main-container d-flex align-items-center justify-content-center">
+<body class="patient-page-bg"> 
+    <div class="container main-container d-flex flex-column align-items-center justify-content-center">
+        <div class="w-100 mb-4" style="max-width: 800px;">
+            <a href="../home.php" class="text-decoration-none text-secondary fw-medium">
+                <i class="bi bi-arrow-left me-1"></i> Back to Home
+            </a>
+        </div>
         <div class="card doctor-card shadow-lg">
 
             <div class="doctor-header d-flex align-items-center gap-4">
