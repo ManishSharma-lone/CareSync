@@ -1,153 +1,149 @@
+<?php
+session_start();
+require_once '../dbconnect.php';
+
+// Check if admin is logged in
+if (!isset($_SESSION['email'])) {
+    header('location:../login.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Details</title>
+    <title>Patient Details | Admin Dashboard</title>
 
     <link rel="stylesheet" href="../Bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="../styles/view_patient.css">
-
+    <link rel="stylesheet" href="../styles/admin_dashboard.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../styles/view_patient.css?v=<?php echo time(); ?>">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
 
-    <div class="container py-5">
-
-        <div class="header-section">
-            <img src="../icons/crowd.png" width="45">
-            <div>
-                <h2>Patient Profile</h2>
-                <p>CareSync Medical Record</p>
-            </div>
+    <div class="sidebar shadow">
+        <div class="text-center mb-5">
+            <img src="../Assets/CareSyncLogo.png" width="45" alt="Logo">
+            <h4 class="mt-2 text-white" style="font-family: 'Custom';">CareSync</h4>
         </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link" href="admin_dashboard.php"><i data-lucide="layout-grid"></i> <span>Dashboard</span></a>
+            <a class="nav-link" href="manage_doctor.php"><i data-lucide="user-cog"></i> <span>Doctors</span></a>
+            <a class="nav-link active" href="manage_patient.php"><i data-lucide="users"></i> <span>Patients</span></a>
+            <a class="nav-link" href="doctor_schedule.php"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+            <a class="nav-link" href="records.php"><i data-lucide="file-text"></i> <span>Records</span></a>
+            <a class="nav-link" href="reports.php"><i data-lucide="bar-chart-3"></i> <span>Reports</span></a>
+        </nav>
 
-        <?php
+        <a href="../logout.php" class="nav-link logout-link">
+            <i data-lucide="log-out"></i> <span>Logout</span>
+        </a>
+    </div>
 
-        require_once '../dbconnect.php';
+    <div class="main-content">
+        <div class="container-fluid py-4">
 
-        if (!isset($_GET['id'])) {
-            header('location:view_patient.php');
-            exit();
-        }
-
-        $id = $_GET['id'];
-
-        $qry = "SELECT * FROM patients WHERE patient_code=?";
-        $stmt = $conn->prepare($qry);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-
-            $data = $result->fetch_assoc();
-
-            ?>
-
-            <div class="patient-card">
-
-                <div class="patient-top">
-
-                    <div class="avatar">
-                        <img src="../icons/crowd.png">
-                    </div>
-
-                    <div class="patient-name">
-                        <h3>
-                            <?php echo $data['full_name']; ?>
-                        </h3>
-                        <p>Patient ID :
-                            <?php echo $id; ?>
-                        </p>
-                    </div>
+            <div class="header-section align-items-center mb-4">
+                <div class="icon-box text-info bg-info text-opacity-75 bg-opacity-10" style="width: 60px; height: 60px;">
+                    <i data-lucide="user" size="32"></i>
                 </div>
-                <div class="row mt-4">
-
-                    <div class="col-md-6">
-
-                        <div class="info">
-                            <span>📧 Email</span>
-                            <p>
-                                <?php echo $data['email']; ?>
-                            </p>
-                        </div>
-
-                        <div class="info">
-                            <span>📱 Mobile</span>
-                            <p>
-                                <?php echo $data['mobile']; ?>
-                            </p>
-                        </div>
-
-                        <div class="info">
-                            <span>🎂 Date of Birth</span>
-                            <p>
-                                <?php echo $data['dob']; ?>
-                            </p>
-                        </div>
-
-                        <div class="info">
-                            <span>🩸 Blood Group</span>
-                            <p>
-                                <?php echo $data['blood_group']; ?>
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-6">
-
-                        <div class="info">
-                            <span>🆔 Aadhar Number</span>
-                            <p>
-                                <?php echo $data['aadhar']; ?>
-                            </p>
-                        </div>
-
-                        <div class="info">
-                            <span>🏙 City</span>
-                            <p>
-                                <?php echo $data['city']; ?>
-                            </p>
-                        </div>
-
-                        <div class="info">
-                            <span>🏠 Address</span>
-                            <p>
-                                <?php echo $data['address']; ?>
-                            </p>
-                        </div>
-
-                    </div>
-
+                <div>
+                    <h2 class="fw-bold mb-0 text-dark">Patient Profile</h2>
+                    <p class="text-muted mb-0">CareSync Medical Record</p>
                 </div>
-
-                <div class="btn-area">
-
-                    <a href="edit_patient.php?id=<?php echo $id ?>" class="btn btn-warning">Edit</a>
-
-                    <a href="delete_patient.php?id=<?php echo $id ?>" class="btn btn-danger">Delete</a>
-
-                    <a href="manage_patient.php" class="btn btn-primary">Back</a>
-
-                </div>
-
             </div>
 
             <?php
+            if (!isset($_GET['id'])) {
+                header('location:manage_patient.php');
+                exit();
+            }
 
-        } else {
+            $id = $_GET['id'];
 
-            echo "<h3 class='text-white text-center'>Invalid Patient ID</h3>";
+            $qry = "SELECT * FROM patients WHERE patient_code=?";
+            $stmt = $conn->prepare($qry);
+            $stmt->bind_param("s", $id);
+            $stmt->execute();
 
-        }
+            $result = $stmt->get_result();
 
-        ?>
+            if ($result->num_rows > 0) {
+                $data = $result->fetch_assoc();
+                ?>
+
+                <div class="patient-card glass-card">
+
+                    <div class="patient-top border-bottom pb-4 mb-4">
+
+                        <div class="avatar shadow-sm d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 80px; height: 80px;">
+                            <i data-lucide="user" size="40"></i>
+                        </div>
+
+                        <div class="patient-name">
+                            <h3 class="fw-bold text-dark mb-1">
+                                <?php echo htmlspecialchars($data['full_name']); ?>
+                            </h3>
+                            <p class="text-muted mb-0 fw-medium">Patient ID: 
+                                <span class="text-info"><?php echo htmlspecialchars($id); ?></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="info">
+                                <span><i data-lucide="mail" size="16"></i> Email</span>
+                                <p><?php echo htmlspecialchars($data['email']); ?></p>
+                            </div>
+                            <div class="info">
+                                <span><i data-lucide="phone" size="16"></i> Mobile</span>
+                                <p><?php echo htmlspecialchars($data['mobile']); ?></p>
+                            </div>
+                            <div class="info">
+                                <span><i data-lucide="calendar-heart" size="16"></i> Date of Birth</span>
+                                <p><?php echo htmlspecialchars($data['dob']); ?></p>
+                            </div>
+                            <div class="info">
+                                <span><i data-lucide="droplet" size="16"></i> Blood Group</span>
+                                <p><?php echo htmlspecialchars($data['blood_group']); ?></p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info">
+                                <span><i data-lucide="credit-card" size="16"></i> Aadhar Number</span>
+                                <p><?php echo htmlspecialchars($data['aadhar']); ?></p>
+                            </div>
+
+                            <div class="info">
+                                <span><i data-lucide="map-pin" size="16"></i> City</span>
+                                <p><?php echo htmlspecialchars($data['city']); ?></p>
+                            </div>
+
+                            <div class="info">
+                                <span><i data-lucide="home" size="16"></i> Address</span>
+                                <p><?php echo htmlspecialchars($data['address']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php
+            } else {
+                echo "<div class='glass-card text-center p-5'><h3 class='text-danger fw-bold'>Invalid Patient ID</h3><a href='manage_patient.php' class='btn btn-info mt-3 text-white'>Back to Manage Actions</a></div>";
+            }
+            ?>
+        </div>
     </div>
+    
+    <script>
+        lucide.createIcons();
+    </script>
     <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

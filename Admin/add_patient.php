@@ -1,5 +1,6 @@
 <?php
 // 1. PHP Logic at the very top
+$success=false;
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     require_once "../dbconnect.php"; // Adjust path if needed
 

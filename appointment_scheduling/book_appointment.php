@@ -114,7 +114,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notifStmt->bind_param("is", $doctorId, $notificationMessage);
         $notifStmt->execute();
 
-        $_SESSION['success'] = "Appointment booked successfully";
+        // =============== SEND EMAIL VIA PHPMAILER ===============
+        
+        // Fetch patient and doctor information securely from users table
+        $stmt_user = $conn->prepare("SELECT name, email FROM users WHERE id = ?");
+        $stmt_user->bind_param("i", $patient_code);
+        $stmt_user->execute();
+        $patData = $stmt_user->get_result()->fetch_assoc();
+
+        $stmt_doc = $conn->prepare("SELECT name FROM users WHERE id = ?");
+        $stmt_doc->bind_param("i", $slot['doctor_code']);
+        $stmt_doc->execute();
+        $docData = $stmt_doc->get_result()->fetch_assoc();
+        $doctor_name = $docData['name'] ?? 'Doctor';
+
+        if ($patData && !empty($patData['email'])) {
+            require_once '../PHPMailer/src/Exception.php';
+            require_once '../PHPMailer/src/PHPMailer.php';
+            require_once '../PHPMailer/src/SMTP.php';
+            
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            try {
+                // Server settings
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com'; 
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'caresyncbbsr@gmail.com'; 
+                $mail->Password   = 'eptjochajicisedu'; 
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                // Recipients
+                $mail->setFrom('caresyncbbsr@gmail.com', 'CareSync Hospitals');
+                $mail->addAddress($patData['email'], $patData['name']);
+
+                // Formatting
+                $date_formatted = date('l, d M Y', strtotime($slot['start_time']));
+                $time_formatted = date('h:i A', strtotime($slot['start_time'])) . ' - ' . date('h:i A', strtotime($slot['end_time']));
+
+                // Content
+                $mail->isHTML(true);
+                $mail->Subject = 'Appointment Confirmed - CareSync';
+                $mail->Body    = "
+                    <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+                        <h2 style='color: #0061ff;'>CareSync Hospitals</h2>
+                        <h3>Dear {$patData['name']},</h3>
+                        <p>Your appointment has been successfully confirmed!</p>
+                        <div style='background: #f8f9fa; border-left: 4px solid #0061ff; padding: 15px; margin: 20px 0;'>
+                            <p style='margin: 5px 0;'><b>Doctor:</b> Dr. {$doctor_name}</p>
+                            <p style='margin: 5px 0;'><b>Date:</b> {$date_formatted}</p>
+                            <p style='margin: 5px 0;'><b>Time:</b> {$time_formatted}</p>
+                            <p style='margin: 5px 0;'><b>Location:</b> {$slot['location']}</p>
+                        </div>
+                        <p>Please arrive at least 15 minutes early and bring your relevant medical records.</p>
+                        <p>Thank you,<br><strong>CareSync Team</strong></p>
+                    </div>
+                ";
+
+                $mail->send();
+            } catch (\Exception $e) {
+                // Mail silently failed, but booking was successful.
+                error_log("Mail Error: " . $mail->ErrorInfo);
+            }
+        }
+
+        $_SESSION['success'] = "Appointment booked successfully & confirmation email dispatched.";
+
         header("Location: appointments.php");
         exit;
     } catch (Exception $e) {

@@ -1,18 +1,32 @@
 <?php
-include __DIR__ . '/../dbconnect.php';
 session_start();
+include __DIR__ . '/../dbconnect.php';
 
-// TEMP (replace with session later)
-$patient_id = 2;
+if (!isset($_SESSION['patient_id'])) {
+    header('location:../login.php');
+    exit();
+}
 
-// Fetch appointments
+// Get patient users.id
+$stmt = $conn->prepare("SELECT id FROM users WHERE patient_code = ?");
+$stmt->bind_param("s", $_SESSION['patient_id']);
+$stmt->execute();
+$res = $stmt->get_result();
+if($res->num_rows == 0) die("Invalid patient!");
+$patient_user_id = $res->fetch_assoc()['id'];
+
+// Fetch appointments using the correct schema
 $query = "SELECT a.*, d.full_name, d.department 
           FROM appointments a
-          JOIN doctors d ON a.doctor_id = d.id
-          WHERE a.patient_id = '$patient_id'
-          ORDER BY a.appointment_date DESC, a.appointment_time DESC";
+          JOIN users u ON a.doctor_code = u.id
+          JOIN doctors d ON d.doctor_code = u.doctor_code
+          WHERE a.patient_code = ?
+          ORDER BY a.start_time DESC";
 
-$result = $conn->query($query);
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $patient_user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -21,107 +35,115 @@ $result = $conn->query($query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My Appointments - CareSync</title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../Bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/patient_dashboard.css?v=<?php echo time(); ?>">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
 
-<?php include 'patient_nav.php'; ?>
+    <div class="sidebar shadow">
+        <div class="text-center mb-5">
+            <img src="../Assets/CareSyncLogo.png" width="45" alt="Logo">
+            <h4 class="text-white fw-bold mt-2" style="font-family: 'Custom';">CareSync</h4>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link" href="./patient_dashboard.php"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a class="nav-link" href="./search_doctor.php"><i data-lucide="search"></i> <span>Search Doctor</span></a>
+            <a class="nav-link active" href="./my_appointments.php"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+            <a class="nav-link" href="#"><i data-lucide="pill"></i> <span>Prescriptions</span></a>
+            <a class="nav-link" href="#"><i data-lucide="file-text"></i> <span>Health Reports</span></a>
+        </nav>
 
-<div class="container mt-4">
-
-    <!-- Heading -->
-    <div class="mb-4">
-        <h3>My Appointments</h3>
-        <p class="text-muted">View and manage your appointments</p>
+        <a href="../logout.php" class="nav-link logout-link">
+            <i data-lucide="log-out"></i> <span>Logout</span>
+        </a>
     </div>
 
-    <!-- Table -->
-    <div class="card shadow">
-        <div class="card-body">
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">My Appointments</h2>
+                <p class="text-muted">Track and manage your upcoming visits securely.</p>
+            </div>
+            <a href="book_appointment.php" class="btn rounded-pill px-4 py-2 fw-bold shadow text-white" style="background: var(--blue-gradient);">
+                <i data-lucide="calendar-plus" class="me-2" style="width: 18px; height: 18px; vertical-align: text-bottom;"></i> Book New Appointment
+            </a>
+        </div>
 
-            <div class="table-responsive">
-                <table class="table table-striped">
+        <div class="container-fluid py-2">
+            
+            <div class="glass-card p-0 overflow-hidden border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light text-secondary">
+                            <tr>
+                                <th class="py-3 px-4 fw-semibold border-bottom-0">Date & Time</th>
+                                <th class="py-3 px-4 fw-semibold border-bottom-0">Doctor</th>
+                                <th class="py-3 px-4 fw-semibold border-bottom-0">Department</th>
+                                <th class="py-3 px-4 fw-semibold border-bottom-0 text-center">Status</th>
+                                <th class="py-3 px-4 fw-semibold border-bottom-0 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Doctor</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+                        <?php if($result->num_rows > 0) { ?>
+                            <?php while($row = $result->fetch_assoc()) { ?>
 
-                    <tbody>
+                            <tr>
+                                <td class="py-3 px-4">
+                                    <div class="fw-bold text-dark"><?= date("d M Y", strtotime($row['start_time'])) ?></div>
+                                    <div class="text-muted small"><i data-lucide="clock" size="14"></i> <?= date("h:i A", strtotime($row['start_time'])) ?> - <?= date("h:i A", strtotime($row['end_time'])) ?></div>
+                                </td>
+                                <td class="py-3 px-4 fw-bold text-primary">Dr <?= htmlspecialchars($row['full_name']) ?></td>
+                                <td class="py-3 px-4"><span class="badge bg-light text-secondary border"><?= htmlspecialchars($row['department']) ?></span></td>
 
-                    <?php if($result->num_rows > 0) { ?>
-                        <?php while($row = $result->fetch_assoc()) { ?>
+                                <td class="py-3 px-4 text-center">
+                                    <?php if(strtolower($row['status']) == 'completed') { ?>
+                                        <span class="badge bg-success rounded-pill px-3 py-2">Completed</span>
+                                    <?php } elseif(strtolower($row['status']) == 'cancelled') { ?>
+                                        <span class="badge bg-danger rounded-pill px-3 py-2">Cancelled</span>
+                                    <?php } else { ?>
+                                        <span class="badge bg-primary text-white rounded-pill px-3 py-2">Upcoming</span>
+                                    <?php } ?>
+                                </td>
 
-                        <tr>
-                            <td><?= date("d M Y", strtotime($row['appointment_date'])) ?></td>
-                            <td><?= date("h:i A", strtotime($row['appointment_time'])) ?></td>
-                            <td>Dr <?= $row['full_name'] ?></td>
-                            <td><?= $row['department'] ?></td>
+                                <td class="py-3 px-4 text-center">
+                                    <?php if(strtolower($row['status']) == 'upcoming' || strtolower($row['status']) == 'confirmed') { ?>
+                                        <a href="cancel_appointment.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                                            Cancel
+                                        </a>
+                                    <?php } else { ?>
+                                        <span class="text-muted opacity-50">-</span>
+                                    <?php } ?>
+                                </td>
+                            </tr>
 
-                            <!-- Status -->
-                            <td>
-                                <?php if($row['status'] == 'Completed') { ?>
-                                    <span class="badge bg-success">Completed</span>
-                                <?php } elseif($row['status'] == 'Cancelled') { ?>
-                                    <span class="badge bg-danger">Cancelled</span>
-                                <?php } else { ?>
-                                    <span class="badge bg-warning text-dark">Upcoming</span>
-                                <?php } ?>
-                            </td>
+                            <?php } ?>
+                        <?php } else { ?>
 
-                            <!-- Action -->
-                            <td>
-                                <?php if($row['status'] == 'Upcoming') { ?>
-                                    <a href="cancel_appointment.php?id=<?= $row['id'] ?>" 
-                                       class="btn btn-sm btn-danger">
-                                        Cancel
-                                    </a>
-                                <?php } else { ?>
-                                    <span class="text-muted">-</span>
-                                <?php } ?>
-                            </td>
-
-                        </tr>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <i data-lucide="calendar-x" size="40" class="mb-3 opacity-50"></i><br>
+                                    <span class="fw-medium">No appointments found.</span>
+                                </td>
+                            </tr>
 
                         <?php } ?>
-                    <?php } else { ?>
 
-                        <tr>
-                            <td colspan="6" class="text-center text-muted">
-                                No appointments found
-                            </td>
-                        </tr>
-
-                    <?php } ?>
-
-                    </tbody>
-
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
     </div>
 
-    <!-- Back Button -->
-    <div class="text-center mt-4">
-        <a href="patient_dashboard.php" 
-           class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
-            ← Back to Dashboard
-        </a>
-    </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>

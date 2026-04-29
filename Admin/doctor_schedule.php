@@ -1,156 +1,162 @@
+<?php
+session_start();
+require_once '../dbconnect.php';
+
+// Check if admin is logged in
+if (!isset($_SESSION['email'])) {
+    header('location:../login.php');
+    exit();
+}
+
+// Search operation
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$whereClause = "WHERE a.status = 'confirmed'";
+$params = [];
+$types = "";
+
+if ($search) {
+    $whereClause .= " AND (p.name LIKE ? OR d.name LIKE ?)";
+    $likeSearch = '%' . $search . '%';
+    $params = [$likeSearch, $likeSearch];
+    $types = "ss";
+}
+
+$query = "
+    SELECT a.id, a.status, t.start_time, d.name as doctor_name, p.name as patient_name
+    FROM appointments a
+    JOIN time_slots t ON a.slot_id = t.id
+    JOIN users p ON a.patient_code = p.id
+    JOIN users d ON t.doctor_code = d.id
+    $whereClause
+    ORDER BY t.start_time DESC
+";
+
+$stmt = $conn->prepare($query);
+if ($search) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Doctor Schedule - CareSync</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>CareSync | Scheduled Appointments</title>
+    
     <!-- Bootstrap -->
     <link rel="stylesheet" href="../Bootstrap/bootstrap.min.css">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../styles/doctor_schedule.css">
+    
+    <!-- Using Admin Dashboard CSS for Uniform Theme -->
+    <link rel="stylesheet" href="../styles/admin_dashboard.css?v=<?php echo time(); ?>">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+<body>
 
-<body class="admin-bg">
+    <!-- SIDEBAR -->
+    <div class="sidebar shadow">
+        <div class="text-center mb-5">
+            <img src="../Assets/CareSyncLogo.png" width="45" alt="Logo">
+            <h4 class="mt-2 text-white fw-bold">CareSync</h4>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link" href="admin_dashboard.php"><i data-lucide="layout-grid"></i> <span>Dashboard</span></a>
+            <a class="nav-link" href="manage_doctor.php"><i data-lucide="user-cog"></i> <span>Doctors</span></a>
+            <a class="nav-link" href="manage_patient.php"><i data-lucide="users"></i> <span>Patients</span></a>
+            <a class="nav-link active" href="doctor_schedule.php"><i data-lucide="calendar"></i> <span>Appointments</span></a>
+            <a class="nav-link" href="records.php"><i data-lucide="file-text"></i> <span>Records</span></a>
+            <a class="nav-link" href="reports.php"><i data-lucide="bar-chart-3"></i> <span>Reports</span></a>
+        </nav>
 
-    <div class="container-fluid px-4 py-4">
+        <a href="../logout.php" class="nav-link logout-link mt-auto">
+            <i data-lucide="log-out"></i> <span>Logout</span>
+        </a>
+    </div>
 
-        <div class="card shadow-lg border-0">
-
-            <!-- HEADER -->
-            <div class="card-header schedule-header d-flex justify-content-between align-items-center">
-
-                <div class="d-flex align-items-center gap-3">
-                    <div class="icon-circle">
-                        <img src="../icons/hospital.png" class="mx-auto mb-3" width="50">
-                    </div>
-
-                    <div class="appoint">
-                        <h4 class="mb-0 fw-bold">
-                            Appointment Scheduled
-                        </h4>
-                        <small>View appointments by department</small>
-                    </div>
-                </div>
-
-                <a href="manage_doctor.php" class="btn btn-light btn-rounded ">
-                    Go Back
-                </a>
-
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">Scheduled Appointments</h2>
+                <p class="text-muted">Manage all confirmed appointments</p>
             </div>
-
-
-            <!-- BODY -->
-            <div class="card-body">
-
-                <!-- FILTER SECTION -->
-                <div class="row mb-4">
-
-                    <!-- Department Dropdown -->
-                    <div class="col-md-4">
-                        <label class="fw-semibold mb-1">Select Department</label>
-                        <select class="form-select shadow-sm">
-                            <option>Select Department</option>
-                            <option>Cardiology</option>
-                            <option>Neurology</option>
-                            <option>Orthopedics</option>
-                            <option>Gynecology</option>
-                            <option>Pediatrics</option>
-                            <option>General Medicine</option>
-                        </select>
-                    </div>
-
-                    <!-- Doctor Dropdown -->
-                    <div class="col-md-4">
-                        <label class="fw-semibold mb-1">Select Doctor</label>
-                        <select class="form-select shadow-sm">
-                            <option>Select Doctor</option>
-                            <option>Dr. Sharma</option>
-                            <option>Dr. Mehta</option>
-                            <option>Dr. Das</option>
-                        </select>
-                    </div>
-
-                    <!-- Date Filter -->
-                    <div class="col-md-3">
-                        <label class="fw-semibold mb-1">Select Date</label>
-                        <input type="date" class="form-control shadow-sm">
-                    </div>
-
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button class="btn btn-primary btn-rounded w-100 fw-bold">
-                            Go
-                        </button>
-                    </div>
-
-                </div>
-
-
-                <!-- TABLE -->
-                <div class="table-responsive">
-
-                    <table class="table table-hover align-middle text-center">
-
-                        <thead class="table-dark">
-
-                            <tr>
-                                <th>Date</th>
-                                <th>Doctor</th>
-                                <th>Patient Name</th>
-                                <th>Time Slot</th>
-                                <th>Status</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <tr>
-                                <td>10 Feb</td>
-                                <td>Dr. Sharma</td>
-                                <td>Ravi Kumar</td>
-                                <td>09:30 AM</td>
-                                <td>
-                                    <span class="badge bg-success px-3 py-2">
-                                        Confirmed
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>10 Feb</td>
-                                <td>Dr. Sharma</td>
-                                <td>Anita Das</td>
-                                <td>10:00 AM</td>
-                                <td>
-                                    <span class="badge bg-primary px-3 py-2">
-                                        Completed
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>10 Feb</td>
-                                <td>Dr. Mehta</td>
-                                <td>Suresh Nayak</td>
-                                <td>11:30 AM</td>
-                                <td>
-                                    <span class="badge bg-danger px-3 py-2">
-                                        Cancelled
-                                    </span>
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-                </div>
+            <div class="glass-card p-2 px-3 d-flex align-items-center gap-3">
+                <span class="small fw-bold">Administrator</span>
+                <div class="vr"></div>
+                <img src="../icons/admin.png" width="35" class="rounded-circle shadow-sm" alt="Admin">
             </div>
         </div>
-    </div>
-        <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
-</body>
 
+        <!-- FILTER & SEARCH SECTION -->
+        <div class="glass-card mb-4 p-4 border-0 shadow-lg">
+            <form method="GET" action="doctor_schedule.php" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" name="search" class="form-control rounded-pill px-4 py-3 bg-light border-0 shadow-sm" placeholder="Search by doctor or patient name..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 fw-bold py-3 shadow-sm d-flex justify-content-center align-items-center gap-2">
+                        <i data-lucide="search" size="18"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- APPOINTMENTS TABLE -->
+        <div class="glass-card p-0 overflow-hidden shadow-lg border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3 border-0">Date</th>
+                            <th class="py-3 border-0">Time</th>
+                            <th class="py-3 border-0">Doctor</th>
+                            <th class="py-3 border-0">Patient Name</th>
+                            <th class="py-3 border-0">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($result->num_rows > 0): ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td class="py-3 text-muted"><?php echo date('d M Y', strtotime($row['start_time'])); ?></td>
+                                    <td class="py-3 fw-bold text-dark"><?php echo date('h:i A', strtotime($row['start_time'])); ?></td>
+                                    <td class="py-3 fw-bold text-primary">Dr. <?php echo htmlspecialchars($row['doctor_name']); ?></td>
+                                    <td class="py-3"><?php echo htmlspecialchars($row['patient_name']); ?></td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
+                                            Confirmed
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="opacity-50">
+                                        <i data-lucide="calendar-x" size="48" class="mb-3 text-muted"></i>
+                                        <h5>No confirmed appointments found.</h5>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+    </script>
+    <script src="../Bootstrap/bootstrap.bundle.min.js"></script>
+</body>
 </html>

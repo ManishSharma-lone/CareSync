@@ -1,7 +1,13 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../PHPMailer/src/Exception.php';
+require '../PHPMailer/src/PHPMailer.php';
+require '../PHPMailer/src/SMTP.php';
+
 session_start();
 require_once '../dbconnect.php';
-
 if (!function_exists('connectDB')) {
     function connectDB() {
         global $conn;
@@ -65,15 +71,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_cancel'])) {
         $canceller_type = ($appointment['patient_code'] == $user_id) ? 'patient' : 'doctor';
         $canceller_name = ($canceller_type == 'patient') ? $appointment['patient_name'] : $appointment['doctor_name'];
 
-        $update = $conn->prepare("UPDATE appointments SET status = 'cancelled', updated_at = NOW() WHERE id = ?");
-        $update->bind_param("i", $appointment_id);
-        $update->execute();
+        $deleteApt = $conn->prepare("DELETE FROM appointments WHERE id = ?");
+        $deleteApt->bind_param("i", $appointment_id);
+        $deleteApt->execute();
 
         $notification_recipient_id = ($canceller_type == 'patient') ? $appointment['doctor_code'] : $appointment['patient_code'];
         $notification_message = "Your appointment on " . date('l, F j, Y', strtotime($appointment['start_time'])) . " has been cancelled.";
         $notify = $conn->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, 'appointment')");
         $notify->bind_param("is", $notification_recipient_id, $notification_message);
         $notify->execute();
+        
+        // =============== SEND EMAIL VIA PHPMAILER ===============
+        $stmt_pat = $conn->prepare("
+            SELECT p.email, p.full_name 
+            FROM patients p
+            JOIN users u ON p.patient_code = u.patient_code
+            WHERE u.id = ?
+        ");
+        $stmt_pat->bind_param("i", $appointment['patient_code']);
+        $stmt_pat->execute();
+        $patRes = $stmt_pat->get_result();
+        
+        if ($patRes->num_rows > 0) {
+            $patData = $patRes->fetch_assoc();
+            
+            if (!empty($patData['email'])) {
+                $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com'; 
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'caresyncbbsr@gmail.com'; 
+                    $mail->Password   = 'eptjochajicisedu'; 
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    $mail->setFrom('caresyncbbsr@gmail.com', 'CareSync Hospitals');
+                    $mail->addAddress($patData['email'], $patData['full_name']);
+
+                    $date_formatted = date('l, d M Y', strtotime($appointment['start_time']));
+                    $time_formatted = date('h:i A', strtotime($appointment['start_time']));
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Appointment Cancelled - CareSync';
+                    $mail->Body    = "
+                        <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+                            <h2 style='color: #dc3545;'>CareSync Hospitals</h2>
+                            <h3>Dear {$patData['full_name']},</h3>
+                            <p>We regret to inform you that your appointment has been cancelled.</p>
+                            <div style='background: #f8f9fa; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0;'>
+                                <p style='margin: 5px 0;'><b>Doctor:</b> Dr. {$appointment['doctor_name']}</p>
+                                <p style='margin: 5px 0;'><b>Date:</b> {$date_formatted}</p>
+                                <p style='margin: 5px 0;'><b>Time:</b> {$time_formatted}</p>
+                            </div>
+                            <p>We apologize for any inconvenience this may cause. You can book a new appointment at your convenience.</p>
+                            <p>Thank you,<br><strong>CareSync Team</strong></p>
+                        </div>
+                    ";
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("Mail Error (Cancellation): " . $mail->ErrorInfo);
+                }
+            }
+        }
 
         $free_slot = $conn->prepare("UPDATE time_slots SET status = 'available', booked_count = GREATEST(booked_count - 1, 0) WHERE id = ?");
         $free_slot->bind_param("i", $appointment['slot_id']);
@@ -274,13 +335,23 @@ try {
                 if (data.success) {
                     const card = document.getElementById('apt-card-' + id);
                     if (card) {
-                        card.classList.remove('confirmed');
-                        card.classList.add('cancelled');
-                        document.getElementById('action-area-' + id).remove();
-                        const badge = document.getElementById('status-badge-' + id);
-                        badge.classList.remove('confirmed');
-                        badge.classList.add('cancelled');
-                        badge.innerText = 'Cancelled';
+                        const col = card.closest('.col-md-6') || card.closest('.col-lg-4');
+                        if (col) {
+                            const dateSection = col.closest('.mb-5');
+                            col.remove();
+                            if (dateSection) {
+                                const remaining = dateSection.querySelectorAll('.col-md-6, .col-lg-4');
+                                if (remaining.length === 0) {
+                                    dateSection.remove();
+                                }
+                            }
+                        } else {
+                            card.remove();
+                        }
+                    }
+                    
+                    if (document.querySelectorAll('.slot-card').length === 0) {
+                        setTimeout(() => window.location.reload(), 1500);
                     }
                     const toastMsg = document.getElementById('toastMsg');
                     toastMsg.innerText = data.message;
